@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimePath | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 font-sans">
+
+    <div class="max-w-md mx-auto">
+        <div class="flex justify-between items-center mb-8 mt-4">
+            <div>
+                <h1 id="displayName" class="text-2xl font-black text-gray-800 uppercase italic leading-none">Loading...</h1>
+                <p id="displayID" class="text-[10px] text-blue-600 font-bold tracking-[0.2em] mt-1">FETCHING IDENTITY</p>
+            </div>
+            <div class="bg-white px-5 py-3 rounded-[1.5rem] shadow-sm border border-blue-50 text-center">
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Trips Left</p>
+                <p id="displayCredits" class="text-2xl font-black text-blue-600">0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-blue-600 p-4 rounded-3xl text-white shadow-lg shadow-blue-200">
+                <p class="text-[10px] font-bold opacity-80 uppercase">Next Slot</p>
+                <p class="text-xl font-black">07:10 AM</p>
+            </div>
+            <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-400 uppercase">Status</p>
+                <p class="text-xl font-black text-green-500">Active</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-50 mb-6">
+            <h2 class="text-xl font-black text-gray-800 mb-2">Secure Your Seat</h2>
+            <p class="text-xs text-gray-400 mb-6 font-medium uppercase tracking-wide">Route: Summerstrand → Campus</p>
+            
+            <button onclick="bookRide()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                BOOK TRIP (1 CREDIT)
+            </button>
+            
+            <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="text-gray-400 uppercase">Fixed Rate</span>
+                    <span class="text-gray-800">R25.00 / Trip</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] text-gray-400 px-10 italic">
+            *Ensure you are within the 6.5km radius. R1.50/min late fee applies after 5 mins.
+        </p>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://jcubwlutixqtbrabaucn.supabase.co/rest/v1/';
+        const SUPABASE_KEY = 'sb_secret_BOmTtvYNuEKHAY3gyMK0Ww_ly9xD9Ey';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 1. Get the ID of the user who just registered
+        const userID = localStorage.getItem('primepath_user_id');
+
+        async function loadProfile() {
+            if (!userID) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userID)
+                .single();
+
+            if (data) {
+                document.getElementById('displayName').innerText = data.full_name.split(' ')[0];
+                document.getElementById('displayID').innerText = data.id;
+                document.getElementById('displayCredits').innerText = data.credits;
+            }
+        }
+
+        async function bookRide() {
+            alert("Checking GPS Radius... (Coming in next update)");
+            // Logic for -1 credit and creating a 'booking' entry will go here
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>
