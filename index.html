@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimePath | Join the Route</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans">
+
+    <div id="app" class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-8 border border-gray-100">
+        <div id="step1">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-black text-blue-600 tracking-tighter italic">PrimePath</h1>
+                <p class="text-gray-400 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">NMU Campus Connect</p>
+            </div>
+
+            <form id="regForm" class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="role" value="STU" class="hidden peer" checked>
+                        <div class="p-4 border-2 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 text-center transition-all">
+                            <span class="block font-bold text-gray-700">Student</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="role" value="DRI" class="hidden peer">
+                        <div class="p-4 border-2 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 text-center transition-all">
+                            <span class="block font-bold text-gray-700">Driver</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="fullName" placeholder="Full Name" required class="w-full px-5 py-4 rounded-xl bg-gray-100 border-none focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="studentNo" placeholder="Student or License No" required class="w-full px-5 py-4 rounded-xl bg-gray-100 border-none focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <button type="button" onclick="goToPlans()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-blue-700 transition-all">
+                    NEXT: SELECT PLAN
+                </button>
+            </form>
+        </div>
+
+        <div id="step2" class="hidden">
+            <h2 class="text-xl font-black text-gray-800 mb-6">Choose Your Pack</h2>
+            <div class="space-y-3 mb-8">
+                <label class="block p-4 border rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border-gray-200">
+                    <input type="radio" name="plan" value="1" class="mr-2" checked> <b>Single Trip</b> - R25
+                </label>
+                <label class="block p-4 border rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border-gray-200">
+                    <input type="radio" name="plan" value="5" class="mr-2"> <b>5-Trip Pack</b> - R125
+                </label>
+                <label class="block p-4 border rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border-gray-200">
+                    <input type="radio" name="plan" value="10" class="mr-2"> <b>Weekly (10 Trips)</b> - R250
+                </label>
+                <label class="block p-4 border rounded-2xl cursor-pointer hover:bg-blue-50 transition-all border-gray-200">
+                    <input type="radio" name="plan" value="40" class="mr-2"> <b>Monthly (40 Trips)</b> - R1000
+                </label>
+            </div>
+            <button onclick="submitAll()" class="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-green-700 transition-all">
+                FINISH & PAY
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Replace with your keys from the "Secrets" tab or Supabase Dashboard
+        const SUPABASE_URL = 'https://jcubwlutixqtbrabaucn.supabase.co/rest/v1/';
+        const SUPABASE_KEY = 'sb_secret_BOmTtvYNuEKHAY3gyMK0Ww_ly9xD9Ey';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function goToPlans() {
+            const role = document.querySelector('input[name="role"]:checked').value;
+            if(role === 'DRI') {
+                submitAll(); // Drivers skip plan selection
+            } else {
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            }
+        }
+
+        async function submitAll() {
+            const fullName = document.getElementById('fullName').value;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const studentNo = document.getElementById('studentNo').value;
+            const credits = role === 'STU' ? document.querySelector('input[name="plan"]:checked').value : 0;
+
+            const { data, error } = await supabase.from('profiles').insert([{
+                full_name: fullName,
+                role: role,
+                student_or_license_no: studentNo,
+                credits: parseInt(credits)
+            }]);
+
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                alert("Success! Welcome to PrimePath.");
+                // Here we would redirect to dashboard.html
+            }
+        }
+    </script>
+</body>
+</html>
