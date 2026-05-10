@@ -63,8 +63,8 @@
                 </label>
             </div>
             <button onclick="submitAll()" class="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-green-700 transition-all">
-                FINISH & PAY
-            </button>
+    FINISH & PAY
+</button>
         </div>
     </div>
 
@@ -87,19 +87,35 @@
         document.getElementById('step2').classList.remove('hidden'); 
     };
 
-    window.submitAll = async function() { 
-        const fullName = document.getElementById('fullName').value; 
-        const role = document.querySelector('input[name="role"]:checked').value; 
-        const studentNo = document.getElementById('studentNo').value; 
-        const plan = document.querySelector('input[name="plan"]:checked'); 
-        const credits = (role === 'STU' && plan) ? parseInt(plan.value) : 0; 
-        const { data, error } = await primeSB.from('profiles').insert([{ 
-            full_name: fullName, 
-            role: role, 
-            student_or_license_no: studentNo, 
-            credits: credits 
-        }]).select(); 
-        if (error) { alert("Database Error: " + error.message); } 
-        else { localStorage.setItem('primepath_user_id', data[0].id); window.location.href = "dashboard.html"; } 
-    };
-</script>
+    window.submitAll = async function() {
+    alert("Button clicked! Starting submission..."); // Checkpoint 1
+
+    try {
+        const fullName = document.getElementById('fullName').value;
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const studentNo = document.getElementById('studentNo').value;
+        
+        // Find the selected plan
+        const selectedPlan = document.querySelector('input[name="plan"]:checked');
+        const credits = (role === 'STU' && selectedPlan) ? parseInt(selectedPlan.value) : 0;
+
+        alert("Data collected: " + fullName + " - Credits: " + credits); // Checkpoint 2
+
+        const { data, error } = await primeSB.from('profiles').insert([{
+            full_name: fullName,
+            role: role,
+            student_or_license_no: studentNo,
+            credits: credits
+        }]).select();
+
+        if (error) {
+            alert("Database Error: " + error.message);
+        } else {
+            alert("Success! Saving ID and moving to dashboard..."); // Checkpoint 3
+            localStorage.setItem('primepath_user_id', data[0].id);
+            window.location.href = "dashboard.html";
+        }
+    } catch (err) {
+        alert("Coding Error: " + err.message);
+    }
+};
