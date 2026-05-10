@@ -68,52 +68,38 @@
         </div>
     </div>
 
+<script>
     // Use 'primeSB' to avoid the "Already Declared" error
-let primeSB;
+    let primeSB;
 
-// This function runs automatically as soon as the page loads
-window.onload = function() {
-    const SB_URL = 'YOUR_SUPABASE_URL';
-    const SB_KEY = 'YOUR_ANON_KEY';
-    
-    // Initialize the connection
-    primeSB = supabase.createClient(SB_URL, SB_KEY);
-    console.log("PrimePath System: Online");
-};
+    window.onload = function() { 
+        const SB_URL = 'YOUR_ACTUAL_URL'; 
+        const SB_KEY = 'YOUR_ACTUAL_ANON_KEY'; 
+        primeSB = supabase.createClient(SB_URL, SB_KEY); 
+        console.log("PrimePath System: Online"); 
+    };
 
-// Define the navigation function globally
-window.goToPlans = function() {
-    const name = document.getElementById('fullName').value;
-    const sn = document.getElementById('studentNo').value;
+    window.goToPlans = function() { 
+        const name = document.getElementById('fullName').value; 
+        const sn = document.getElementById('studentNo').value; 
+        if (!name || !sn) { alert("Please enter your name and student number first!"); return; } 
+        document.getElementById('step1').classList.add('hidden'); 
+        document.getElementById('step2').classList.remove('hidden'); 
+    };
 
-    if (!name || !sn) {
-        alert("Please enter your name and student number first!");
-        return;
-    }
-
-    document.getElementById('step1').classList.add('hidden');
-    document.getElementById('step2').classList.remove('hidden');
-};
-
-// Define the submission function globally
-window.submitAll = async function() {
-    const fullName = document.getElementById('fullName').value;
-    const role = document.querySelector('input[name="role"]:checked').value;
-    const studentNo = document.getElementById('studentNo').value;
-    const plan = document.querySelector('input[name="plan"]:checked');
-    const credits = (role === 'STU' && plan) ? parseInt(plan.value) : 0;
-
-    const { data, error } = await primeSB.from('profiles').insert([{
-        full_name: fullName,
-        role: role,
-        student_or_license_no: studentNo,
-        credits: credits
-    }]).select();
-
-    if (error) {
-        alert("Database Error: " + error.message);
-    } else {
-        localStorage.setItem('primepath_user_id', data[0].id);
-        window.location.href = "dashboard.html";
-    }
-};
+    window.submitAll = async function() { 
+        const fullName = document.getElementById('fullName').value; 
+        const role = document.querySelector('input[name="role"]:checked').value; 
+        const studentNo = document.getElementById('studentNo').value; 
+        const plan = document.querySelector('input[name="plan"]:checked'); 
+        const credits = (role === 'STU' && plan) ? parseInt(plan.value) : 0; 
+        const { data, error } = await primeSB.from('profiles').insert([{ 
+            full_name: fullName, 
+            role: role, 
+            student_or_license_no: studentNo, 
+            credits: credits 
+        }]).select(); 
+        if (error) { alert("Database Error: " + error.message); } 
+        else { localStorage.setItem('primepath_user_id', data[0].id); window.location.href = "dashboard.html"; } 
+    };
+</script>
