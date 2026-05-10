@@ -67,41 +67,51 @@
     </div>
 
     <script>
-        // Replace with your keys from the "Secrets" tab or Supabase Dashboard
-        const SUPABASE_URL = 'https://jcubwlutixqtbrabaucn.supabase.co/rest/v1/';
-        const SUPABASE_KEY = 'sb_publishable_bgeZOuPQeOB5o8iM2YPwhw_p0N-3dGv';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // 1. Initialize Supabase ONCE (Make sure these are the correct keys!)
+    const SB_URL = 'https://jcubwlutixqtbrabaucn.supabase.co/rest/v1/';
+    const SB_KEY = 'sb_publishable_bgeZOuPQeOB5o8iM2YPwhw_p0N-3dGv';
+    
+    // We use 'sb' as a short name to avoid "already declared" conflicts
+    const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        function goToPlans() {
-            const role = document.querySelector('input[name="role"]:checked').value;
-            if(role === 'DRI') {
-                submitAll(); // Drivers skip plan selection
-            } else {
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-            }
+    // 2. The Navigation Function
+    // We define it clearly so the button can find it
+    window.goToPlans = function() {
+        console.log("Navigating to plans...");
+        const name = document.getElementById('fullName').value;
+        const sn = document.getElementById('studentNo').value;
+
+        if (!name || !sn) {
+            alert("Please fill in your details first!");
+            return;
         }
 
-        async function submitAll() {
-            const fullName = document.getElementById('fullName').value;
-            const role = document.querySelector('input[name="role"]:checked').value;
-            const studentNo = document.getElementById('studentNo').value;
-            const credits = role === 'STU' ? document.querySelector('input[name="plan"]:checked').value : 0;
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    };
 
-            const { data, error } = await supabase.from('profiles').insert([{
-                full_name: fullName,
-                role: role,
-                student_or_license_no: studentNo,
-                credits: parseInt(credits)
-            }]);
+    // 3. The Submit Function
+    window.submitAll = async function() {
+        const fullName = document.getElementById('fullName').value;
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const studentNo = document.getElementById('studentNo').value;
+        const plan = document.querySelector('input[name="plan"]:checked');
+        const credits = (role === 'STU' && plan) ? plan.value : 0;
 
-            if (error) {
-                alert("Error: " + error.message);
-            } else {
-                alert("Success! Welcome to PrimePath.");
-                // Here we would redirect to dashboard.html
-            }
+        console.log("Submitting to Supabase...");
+
+        const { data, error } = await sb.from('profiles').insert([{
+            full_name: fullName,
+            role: role,
+            student_or_license_no: studentNo,
+            credits: parseInt(credits)
+        }]).select();
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            localStorage.setItem('primepath_user_id', data[0].id);
+            window.location.href = "dashboard.html";
         }
-    </script>
-</body>
-</html>
+    };
+</script>
