@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrimePath | Join the Route</title>
@@ -66,52 +68,52 @@
         </div>
     </div>
 
-    <script>
-    // 1. Initialize Supabase ONCE (Make sure these are the correct keys!)
-    const SB_URL = 'https://jcubwlutixqtbrabaucn.supabase.co/rest/v1/';
-    const SB_KEY = 'sb_publishable_bgeZOuPQeOB5o8iM2YPwhw_p0N-3dGv';
+    // Use 'primeSB' to avoid the "Already Declared" error
+let primeSB;
+
+// This function runs automatically as soon as the page loads
+window.onload = function() {
+    const SB_URL = 'YOUR_SUPABASE_URL';
+    const SB_KEY = 'YOUR_ANON_KEY';
     
-    // We use 'sb' as a short name to avoid "already declared" conflicts
-    const sb = supabase.createClient(SB_URL, SB_KEY);
+    // Initialize the connection
+    primeSB = supabase.createClient(SB_URL, SB_KEY);
+    console.log("PrimePath System: Online");
+};
 
-    // 2. The Navigation Function
-    // We define it clearly so the button can find it
-    window.goToPlans = function() {
-        console.log("Navigating to plans...");
-        const name = document.getElementById('fullName').value;
-        const sn = document.getElementById('studentNo').value;
+// Define the navigation function globally
+window.goToPlans = function() {
+    const name = document.getElementById('fullName').value;
+    const sn = document.getElementById('studentNo').value;
 
-        if (!name || !sn) {
-            alert("Please fill in your details first!");
-            return;
-        }
+    if (!name || !sn) {
+        alert("Please enter your name and student number first!");
+        return;
+    }
 
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-    };
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+};
 
-    // 3. The Submit Function
-    window.submitAll = async function() {
-        const fullName = document.getElementById('fullName').value;
-        const role = document.querySelector('input[name="role"]:checked').value;
-        const studentNo = document.getElementById('studentNo').value;
-        const plan = document.querySelector('input[name="plan"]:checked');
-        const credits = (role === 'STU' && plan) ? plan.value : 0;
+// Define the submission function globally
+window.submitAll = async function() {
+    const fullName = document.getElementById('fullName').value;
+    const role = document.querySelector('input[name="role"]:checked').value;
+    const studentNo = document.getElementById('studentNo').value;
+    const plan = document.querySelector('input[name="plan"]:checked');
+    const credits = (role === 'STU' && plan) ? parseInt(plan.value) : 0;
 
-        console.log("Submitting to Supabase...");
+    const { data, error } = await primeSB.from('profiles').insert([{
+        full_name: fullName,
+        role: role,
+        student_or_license_no: studentNo,
+        credits: credits
+    }]).select();
 
-        const { data, error } = await sb.from('profiles').insert([{
-            full_name: fullName,
-            role: role,
-            student_or_license_no: studentNo,
-            credits: parseInt(credits)
-        }]).select();
-
-        if (error) {
-            alert("Error: " + error.message);
-        } else {
-            localStorage.setItem('primepath_user_id', data[0].id);
-            window.location.href = "dashboard.html";
-        }
-    };
-</script>
+    if (error) {
+        alert("Database Error: " + error.message);
+    } else {
+        localStorage.setItem('primepath_user_id', data[0].id);
+        window.location.href = "dashboard.html";
+    }
+};
